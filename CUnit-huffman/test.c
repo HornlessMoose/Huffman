@@ -5,16 +5,16 @@
 typedef unsigned char Byte;
 
 typedef struct HuffmanArvore {
-	void* byteArvore;
-	size_t tipoDado;
-	int frequencia;
-	struct HuffmanArvore* esquerda;
-	struct HuffmanArvore* direita;
-	struct HuffmanArvore* proximo;
+    void* byteArvore;
+    size_t tipoDado;
+    int frequencia;
+    struct HuffmanArvore* esquerda;
+    struct HuffmanArvore* direita;
+    struct HuffmanArvore* proximo;
 } HuffmanArvore;
 
 typedef struct filaPrioridade{
-	HuffmanArvore* cabeca;
+    HuffmanArvore* cabeca;
 }filaPrioridade;
 
 
@@ -37,29 +37,29 @@ int clean_suite(void) {
 }
 
 HuffmanArvore* criarNo(void* byte, size_t tipoDado,int frequencia){
-	HuffmanArvore* novoNo = (HuffmanArvore*) malloc(sizeof(HuffmanArvore));
+    HuffmanArvore* novoNo = (HuffmanArvore*) malloc(sizeof(HuffmanArvore));
 
-	novoNo->tipoDado = tipoDado;
-	novoNo->byteArvore = malloc(tipoDado);
-	novoNo->frequencia = frequencia;
+    novoNo->tipoDado = tipoDado;
+    novoNo->byteArvore = malloc(tipoDado);
+    novoNo->frequencia = frequencia;
 
-	novoNo->esquerda = novoNo->direita = novoNo->proximo = NULL;
+    novoNo->esquerda = novoNo->direita = novoNo->proximo = NULL;
 
-	unsigned i;
-	for(i = 0; i < tipoDado; i++)
-		*(Byte*)(novoNo->byteArvore + i) = *(Byte*)(byte + i);
+    unsigned i;
+    for(i = 0; i < tipoDado; i++)
+        *(Byte*)(novoNo->byteArvore + i) = *(Byte*)(byte + i);
 
-	return novoNo;
+    return novoNo;
 
 }
 
 
 filaPrioridade* criarFila(){
-	filaPrioridade* novaFila = (filaPrioridade*) malloc(sizeof(filaPrioridade));
+    filaPrioridade* novaFila = (filaPrioridade*) malloc(sizeof(filaPrioridade));
 
-	novaFila->cabeca = NULL;
+    novaFila->cabeca = NULL;
 
-	return novaFila;
+    return novaFila;
 }
 
 
@@ -71,29 +71,29 @@ int filaVazia(filaPrioridade* fila){
 void enfileirar(filaPrioridade* fila, HuffmanArvore* novoNo){
 
 
-	if(filaVazia(fila) || fila->cabeca->frequencia >= novoNo->frequencia){
-		novoNo->proximo = fila->cabeca;
-		fila->cabeca = novoNo;
-	}
-	else{
-		HuffmanArvore* temp = fila->cabeca;
-		while(temp->proximo != NULL && temp->proximo->frequencia < novoNo->frequencia){
-			temp = temp->proximo;
-		}
-		novoNo->proximo = temp->proximo;
-		temp->proximo = novoNo;
+    if(filaVazia(fila) || fila->cabeca->frequencia >= novoNo->frequencia){
+        novoNo->proximo = fila->cabeca;
+        fila->cabeca = novoNo;
+    }
+    else{
+        HuffmanArvore* temp = fila->cabeca;
+        while(temp->proximo != NULL && temp->proximo->frequencia < novoNo->frequencia){
+            temp = temp->proximo;
+        }
+        novoNo->proximo = temp->proximo;
+        temp->proximo = novoNo;
 
-	}
+    }
 }
 
 HuffmanArvore* desenfileirar(filaPrioridade* fila){
-	if(!filaVazia(fila)){
-		HuffmanArvore* No = fila->cabeca;
-		fila->cabeca = fila->cabeca->proximo;
-		No->proximo = NULL;
-		return No;
-	}
-	return NULL;
+    if(!filaVazia(fila)){
+        HuffmanArvore* No = fila->cabeca;
+        fila->cabeca = fila->cabeca->proximo;
+        No->proximo = NULL;
+        return No;
+    }
+    return NULL;
 }
 
 
@@ -127,39 +127,46 @@ void testeFilaVazia() {
 
 
 void testEnfileirar() {
-    Byte byte = '*';
+    Byte byte = 'T';
+    int frequencia = 42;
     filaPrioridade* fila = criarFila();
-    HuffmanArvore* arvore = criarNo(&byte, sizeof(Byte), 101);
+    HuffmanArvore* arvore = criarNo(&byte, sizeof(Byte), frequencia);
     enfileirar(fila, arvore);
 
+
     if (!filaVazia(fila)) {
-        CU_ASSERT(desenfileirar(fila) != NULL);
+        CU_ASSERT( *(Byte*)(fila->cabeca->byteArvore) == byte && fila->cabeca->frequencia == frequencia);
     }
 }
 
 void testDesenfileirar() {
-    filaPrioridade* fila = criarFila();
+	  Byte byte = 'G';
+	    int frequencia = 11;
+	    filaPrioridade* fila = criarFila();
+	    HuffmanArvore* arvore = criarNo(&byte, sizeof(Byte), frequencia);
+	    enfileirar(fila, arvore);
+	    HuffmanArvore* validador = desenfileirar(fila);
 
-    if (desenfileirar(fila) == NULL) {
-        CU_ASSERT(1);
-    }
+	    if (!filaVazia(fila)) {
+	        CU_ASSERT( validador->frequencia == 101 && *(Byte*)(validador->byteArvore) == byte);
+	    }
 }
 
 int main() {
     CU_pSuite pSuite = NULL;
 
-    /* Initialize the CUnit test registry */
+
     if (CUE_SUCCESS != CU_initialize_registry())
         return CU_get_error();
 
-    /* Add a suite to the registry */
+
     pSuite = CU_add_suite("CUnit-Huffman", init_suite, clean_suite);
     if (NULL == pSuite) {
         CU_cleanup_registry();
         return CU_get_error();
     }
 
-    /* Add the tests to the suite */
+
     if ((NULL == CU_add_test(pSuite, "testeCriarNo", testeCriarNo)) ||
             (NULL == CU_add_test(pSuite, "testeCriarFila", testeCriarFila)) ||
             (NULL == CU_add_test(pSuite, "testeFilaVazia", testeFilaVazia)) ||
@@ -169,7 +176,7 @@ int main() {
         return CU_get_error();
     }
 
-    /* Run all tests using the CUnit Basic interface */
+
     CU_basic_set_mode(CU_BRM_VERBOSE);
     CU_basic_run_tests();
     CU_cleanup_registry();
